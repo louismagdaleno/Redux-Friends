@@ -1,28 +1,51 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import FriendsContainer from './Component/FriendsContainer';
+import FriendsForm from './Component/FriendsForm';
+import Navigation from './Component/Navigation';
+import { connect } from 'react-redux';
+import { fetchFriends } from './Action';
+
+import { Route } from 'react-router-dom';
 
 class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
-  }
+	componentDidMount() {
+		this.props.fetchFriends();
+	}
+
+	render() {
+		return (
+			<div className="App">
+				<Route path="/" render={(props) => <Navigation {...props} />} />
+				<Route exact path="/" render={() => <FriendsForm />} />
+				<Route
+					exact
+					path="/"
+					render={(props) => (
+						<FriendsContainer
+							friends={this.props.friends}
+							{...props}
+							deleteFriend={this.deleteFriend}
+							updateInfo={this.updateInfo}
+						/>
+					)}
+				/>
+			</div>
+		);
+	}
 }
 
-export default App;
+const mapStateToProps = (state) => {
+	const { friendsReducer } = state;
+	return {
+		friends: friendsReducer.friends,
+		error: friendsReducer.error,
+		fetchFriends: friendsReducer.fetchFriends
+	};
+};
+
+// our mapStateToProps needs to have two properties inherited from state
+// the characters and the fetching boolean
+export default connect(mapStateToProps, {
+	fetchFriends
+})(App);
